@@ -25,8 +25,6 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<struct FUrgWrapper>();
 #define FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_28_SPARSE_DATA
 #define FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_28_RPC_WRAPPERS \
  \
-	DECLARE_FUNCTION(exechokuyoTest); \
-	DECLARE_FUNCTION(exectestFunction); \
 	DECLARE_FUNCTION(execsetScanningDegree); \
 	DECLARE_FUNCTION(execcloseConnectionifFalse); \
 	DECLARE_FUNCTION(execcloseConnection); \
@@ -42,8 +40,6 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<struct FUrgWrapper>();
 
 #define FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_28_RPC_WRAPPERS_NO_PURE_DECLS \
  \
-	DECLARE_FUNCTION(exechokuyoTest); \
-	DECLARE_FUNCTION(exectestFunction); \
 	DECLARE_FUNCTION(execsetScanningDegree); \
 	DECLARE_FUNCTION(execcloseConnectionifFalse); \
 	DECLARE_FUNCTION(execcloseConnection); \

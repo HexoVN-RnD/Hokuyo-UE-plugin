@@ -8,17 +8,6 @@
 TArray<FVector2D> kmeans_centroids;
 TArray<FVector2D> db_centroids;
 
-bool UHokuyoReadBPLibrary::testFunction(float value, int value2, FString& ReturnValue2)
-{
-	ReturnValue2 = "Hello World!";
-	return true;
-}
-
-bool UHokuyoReadBPLibrary::hokuyoTest(int value, int& ReturnPew)
-{
-	return true;
-}
-
 void UHokuyoReadBPLibrary::closeConnectionifFalse(bool Result, UPARAM(ref) FUrgWrapper& UrgWrapper)
 {
 	if (!Result) {
@@ -63,18 +52,6 @@ bool UHokuyoReadBPLibrary::closeConnection(UPARAM(ref) FUrgWrapper& UrgWrapper)
 	return true;
 }
 
-//void UHokuyoReadBPLibrary::PointsToString(const TArray<FVector2D>& Points, FString& StringPoints)
-//{
-//	for (int i = 0; i < Points.Num(); i++)
-//	{
-//		StringPoints += FString::Printf(TEXT("(%d, %d)"), (int)Points[i].X, (int)Points[i].Y);
-//		if (i < Points.Num() - 1)
-//		{
-//			StringPoints += ", ";
-//		}
-//	}
-//}
-
 void bubbleSort(TArray<FVector2D>& centroids) {
 	for (int i = 0; i < centroids.Num() - 1; i++) {
 		for (int j = 0; j < centroids.Num() - i - 1; j++) {
@@ -85,7 +62,7 @@ void bubbleSort(TArray<FVector2D>& centroids) {
 	}
 }
 
-bool UHokuyoReadBPLibrary::getDistance(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes)
+bool UHokuyoReadBPLibrary::getDistance(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes, bool enableKMeans, int k, bool enableDBSCAN, float eps, int min_pts)
 {
 	urg_t& urg = UrgWrapper.Urg;
 	int ret;
@@ -141,153 +118,102 @@ bool UHokuyoReadBPLibrary::getDistance(UPARAM(ref) FUrgWrapper& UrgWrapper, int 
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 0.025f, FColor::Red, xyString);*/
 
-#if 1 //1 for DBSCAN, 0 for KMeans
-			// Add points to db_points TArray
-			DBPoint dbpoint = { x, y };
-			db_all_points.Add(dbpoint);
-#else
-			// Add points to the kmeans_all_points TArray.
-			FString coordinates = FString::FromInt(x) + " " + FString::FromInt(y);
-			Point point(point_id, coordinates);
-			kmeans_all_points.Add(point);
-#endif
+			if (enableDBSCAN)
+			{
+				// Add points to db_points TArray
+				DBPoint dbpoint = { x, y };
+				db_all_points.Add(dbpoint);
+			}
+			
+			if (enableKMeans)
+			{
+				// Add points to the kmeans_all_points TArray.
+				FString coordinates = FString::FromInt(x) + " " + FString::FromInt(y);
+				Point point(point_id, coordinates);
+				kmeans_all_points.Add(point);
+			}
+
 			// Increment point number
 			point_id++;
 		}
 
-#if 1 //1 for DBSCAN, 0 for KMeans
-		// Run the DBSCAN algorithm on your data
-		double eps = 30; // The maximum distance between two samples for one to be considered as in the neighborhood of the other
-		//30, 100
-		int min_pts = 3; // The number of samples in a neighborhood for a point to be considered as a core point
-		//3
-		TArray<TArray<DBPoint>> db_clusters = DBScan::PerformDBScan(db_all_points, eps, min_pts);
-		// Create a local copy of the centroids for printing
-		db_centroids = DBScan::GetCentroids(db_clusters);
-
-		bubbleSort(db_centroids);
-
-		// Output all points coordinates and cluster labels
-		/*GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, TEXT("All points:"));
-		for (int32 z = 0; z < db_all_points.Num(); z++)
+		if (enableDBSCAN)
 		{
-			FString ClusterLabel;
-			for (int32 x = 0; x < db_clusters.Num(); x++)
+			// Run the DBSCAN algorithm on your data
+			TArray<TArray<DBPoint>> db_clusters = DBScan::PerformDBScan(db_all_points, eps, min_pts);
+			// Create a local copy of the centroids for printing
+			db_centroids = DBScan::GetCentroids(db_clusters);
+
+			bubbleSort(db_centroids);
+
+			// Output all points coordinates and cluster labels
+			/*GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, TEXT("All points:"));
+			for (int32 z = 0; z < db_all_points.Num(); z++)
 			{
-				if (db_clusters[x].Contains(db_all_points[i]))
+				FString ClusterLabel;
+				for (int32 x = 0; x < db_clusters.Num(); x++)
 				{
-					ClusterLabel = FString::Printf(TEXT("%d"), x + 1);
-					break;
+					if (db_clusters[x].Contains(db_all_points[i]))
+					{
+						ClusterLabel = FString::Printf(TEXT("%d"), x + 1);
+						break;
+					}
 				}
+				GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, FString::Printf(TEXT("(%f, %f) - cluster %s"), db_all_points[i].X, db_all_points[i].Y, *ClusterLabel));
+			}*/
+
+			/*GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Yellow, FString::Printf(TEXT("Centroids: %d"), db_centroids.Num()));
+			for (auto& Centroid : db_centroids)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Yellow, FString::Printf(TEXT("(%f, %f)"), Centroid.X, Centroid.Y));
 			}
-			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow, FString::Printf(TEXT("(%f, %f) - cluster %s"), db_all_points[i].X, db_all_points[i].Y, *ClusterLabel));
-		}*/
 
-		/*GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Yellow, FString::Printf(TEXT("Centroids: %d"), db_centroids.Num()));
-		for (auto& Centroid : db_centroids)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.02f, FColor::Yellow, FString::Printf(TEXT("(%f, %f)"), Centroid.X, Centroid.Y));
+			UE_LOG(LogTemp, Warning, TEXT("Centroids: %d"), db_centroids.Num());
+			for (auto& Centroid : db_centroids)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("(%f, %f)"), Centroid.X, Centroid.Y);
+			}*/
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Centroids: %d"), db_centroids.Num());
-		for (auto& Centroid : db_centroids)
+		if (enableKMeans)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("(%f, %f)"), Centroid.X, Centroid.Y);
-		}*/
-#else
-		// Set the number of clusters
-		int K = 1;
+			// Set the number of clusters
+			int K = k;
 
-		// Set a fixed seed (starting point) for the random number generator
-		srand(245);
+			// Set a fixed seed (starting point) for the random number generator
+			srand(245);
 
-		// Run the KMeans clustering algorithm
-		int iters = 100;
-		KMeans kmeans(K, iters);
-		kmeans.run(kmeans_all_points);
+			// Run the KMeans clustering algorithm
+			int iters = 100;
+			KMeans kmeans(K, iters);
+			kmeans.run(kmeans_all_points);
 
-		// Print the final cluster assignments for each point
-		/*for (int q = 0; q < kmeans_all_points.Num(); q++)
-		{
-			UE_LOG(LogTemp, Log, TEXT("point %d: (%f, %f) -> cluster %d"), q, kmeans_all_points[q].getVal(0), kmeans_all_points[q].getVal(1), kmeans_all_points[q].getCluster());
-		}*/
+			// Print the final cluster assignments for each point
+			/*for (int q = 0; q < kmeans_all_points.Num(); q++)
+			{
+				UE_LOG(LogTemp, Log, TEXT("point %d: (%f, %f) -> cluster %d"), q, kmeans_all_points[q].getVal(0), kmeans_all_points[q].getVal(1), kmeans_all_points[q].getCluster());
+			}*/
 
-		// Create a TArray to store the coordinates of the centroids at this time step
-		kmeans_centroids.SetNum(K);
-		const TArray<Cluster>& clusters = kmeans.getClusters();
+			// Create a TArray to store the coordinates of the centroids at this time step
+			kmeans_centroids.SetNum(K);
+			const TArray<Cluster>& clusters = kmeans.getClusters();
 
-		for (int w = 0; w < K; w++)
-		{
-			double x = clusters[w].getCentroidByPos(0);
-			double y = clusters[w].getCentroidByPos(1);
+			for (int w = 0; w < K; w++)
+			{
+				double x = clusters[w].getCentroidByPos(0);
+				double y = clusters[w].getCentroidByPos(1);
 
-			// Store the coordinates of the centroid in the kmeans_centroids TArray
-			kmeans_centroids[w] = FVector2D(x, y);
+				// Store the coordinates of the centroid in the kmeans_centroids TArray
+				kmeans_centroids[w] = FVector2D(x, y);
+			}
+
+			bubbleSort(kmeans_centroids);
+
+			// Print the sorted kmeans_centroids TArray
+			//for (int r = 0; r < kmeans_centroids.Num(); r++) {
+			//	UE_LOG(LogTemp, Warning, TEXT("Centroid %d: (%f, %f)"), r + 1, kmeans_centroids[r].X, kmeans_centroids[r].Y);
+			//}
 		}
-
-		bubbleSort(kmeans_centroids);
-
-		// Print the sorted kmeans_centroids TArray
-		//for (int r = 0; r < kmeans_centroids.Num(); r++) {
-		//	UE_LOG(LogTemp, Warning, TEXT("Centroid %d: (%f, %f)"), r + 1, kmeans_centroids[r].X, kmeans_centroids[r].Y);
-		//}
-
-		//static TArray<TArray<FVector2D>> history;
-
-		//// Add the kmeans_centroids TArray to the history TArray
-		//history.Add(kmeans_centroids);
-
-		//// Check if there is enough data in the history TArray to determine movement
-		//if (history.Num() >= 2)
-		//{
-		//	// Get the previous and current centroids from the history TArray
-		//	const TArray<FVector2D>& prev_centroids = history[history.Num() - 2];
-		//	const TArray<FVector2D>& curr_centroids = history[history.Num() - 1];
-
-		//	// Calculate the movement vectors for each cluster
-		//	for (int e = 0; e < K; e++)
-		//	{
-		//		double dx = curr_centroids[e].X - prev_centroids[e].X;
-		//		double dy = curr_centroids[e].Y - prev_centroids[e].Y;
-		//		double n = 10;
-		//		double m = 5;
-
-		//		/*UE_LOG(LogTemp, Warning, TEXT("Cluster %d movement: (%f, %f)"), e + 1, dx, dy);*/
-
-		//		// Calculate the distance between the current and previous positions
-		//		double dist = sqrt(dx * dx + dy * dy);
-
-		//		// Check if the distance is greater than the threshold value n
-		//		if (dist > n)
-		//		{
-		//			// Determine the direction of movement based on the movement vector
-		//			FString direction;
-		//			if (abs(dx) > abs(dy))
-		//			{
-		//				if (dx > 0)
-		//					direction = "up";
-		//				else
-		//					direction = "down";
-		//			}
-		//			else
-		//			{
-		//				if (dy > 0)
-		//					direction = "right";
-		//				else
-		//					direction = "left";
-		//			}
-
-		//			UE_LOG(LogTemp, Warning, TEXT("Cluster %d is moving: %s"), e + 1, *direction);
-		//		}
-		//		else
-		//		{
-		//			/*UE_LOG(LogTemp, Warning, TEXT("Cluster %d is not moving"), e + 1);*/
-		//		}
-		//	}
-		//}
-#endif
 	}
-
 	// Free memory
 	free(data);
 
@@ -341,17 +267,21 @@ class FGetDistanceTask : public FNonAbandonableTask
 
 	FUrgWrapper& UrgWrapper;
 	int CaptureTimes;
+	bool enableKMeans;
+	int k;
+	bool enableDBSCAN;
+	float eps;
+	int min_pts;
 
 public:
-	FGetDistanceTask(FUrgWrapper& InUrgWrapper, int InCaptureTimes)
-		: UrgWrapper(InUrgWrapper)
-		, CaptureTimes(InCaptureTimes)
+	FGetDistanceTask(FUrgWrapper& InUrgWrapper, int InCaptureTimes, bool InEnableKmeans, int InK, bool InEnableDBSCAN, float InEps, int InMin_pts)
+		: UrgWrapper(InUrgWrapper), CaptureTimes(InCaptureTimes), enableKMeans(InEnableKmeans), k(InK), enableDBSCAN(InEnableDBSCAN), eps(InEps), min_pts(InMin_pts)
 	{
 	}
 
 	void DoWork()
 	{
-		UHokuyoReadBPLibrary::getDistance(UrgWrapper, CaptureTimes);
+		UHokuyoReadBPLibrary::getDistance(UrgWrapper, CaptureTimes, enableKMeans, k, enableDBSCAN, eps, min_pts);
 	}
 
 	FORCEINLINE TStatId GetStatId() const
@@ -360,7 +290,7 @@ public:
 	}
 };
 
-void UHokuyoReadBPLibrary::getDistanceNonBlocking(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes)
+void UHokuyoReadBPLibrary::getDistanceNonBlocking(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes, bool enableKMeans, int k, bool enableDBSCAN, float eps, int min_pts)
 {
-	(new FAutoDeleteAsyncTask<FGetDistanceTask>(UrgWrapper, CaptureTimes))->StartBackgroundTask();
+	(new FAutoDeleteAsyncTask<FGetDistanceTask>(UrgWrapper, CaptureTimes, enableKMeans, k, enableDBSCAN, eps, min_pts))->StartBackgroundTask();
 }

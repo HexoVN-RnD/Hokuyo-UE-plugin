@@ -43,12 +43,12 @@ public:
 	static void ClearDBSCANCentroids();
 
 	//get scanning distance results
-	UFUNCTION(BlueprintCallable, Category = "Hokuyo | Scanning", meta = (DisplayName = "Get Distance Result (Blocking)", KeyWords = "Hokuyo", ToolTip = "This will execute on the main thread and freeze your program @param CaptureTimes Number of time it will run. 0 means it will run indefinitely"))
-	static bool getDistance(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes);
+	UFUNCTION(BlueprintCallable, Category = "Hokuyo | Scanning", meta = (DisplayName = "Get Distance Result (Blocking)", KeyWords = "Hokuyo", ToolTip = "This will execute on the main thread and freeze your program\n @param CaptureTimes Number of time it will run. 0 means it will run indefinitely"))
+	static bool getDistance(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes, bool enableKMeans = false, int k = 1, bool enableDBSCAN = true, float eps = 30, int min_pts = 3);
 
 	//async function that calls getDistance. This is used to call getDistance in a non-blocking way.
-	UFUNCTION(BlueprintCallable, Category = "Hokuyo | Scanning", meta = (DisplayName = "Get Distance Result", KeyWords = "Hokuyo", ToolTip = "Get the Sensor Distance Measurement Result @param CaptureTimes Number of time it will run. 0 means it will run indefinitely"))
-	static void getDistanceNonBlocking(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes);
+	UFUNCTION(BlueprintCallable, Category = "Hokuyo | Scanning", meta = (DisplayName = "Get Distance Result", KeyWords = "Hokuyo", ToolTip = "Get the Sensor Distance Measurement Result using KMeans or DBSCAN\n@param CaptureTimes Number of time it will run. 0 means it will run indefinitely\n@param k For KMeans: Number of clusters\n@param eps For DBSCAN: Epsilon, the maximum distance two points can be from one another while still belonging to the same cluster\n@param min_pts For DBSCAN: the fewest number of points required to form a cluster"))
+	static void getDistanceNonBlocking(UPARAM(ref) FUrgWrapper& UrgWrapper, int CaptureTimes, bool enableKMeans = false, int k = 1, bool enableDBSCAN = true, float eps = 30, int min_pts = 3);
 
 
 public:
@@ -68,17 +68,6 @@ public:
 	//set scanning degrees
 	UFUNCTION(BlueprintCallable, meta = (KeyWords = "Hokuyo", ToolTip = "Set Sensor Scanning Degree to the left and right of the vertical axis from origin point @param LeftDegree Scanning Degree to the left of the vertical axis from origin point @param RightDegree Scanning Degree to the right of the vertical axis from origin point"), Category = "Hokuyo | Connection")
 	static bool setScanningDegree(UPARAM(ref) FUrgWrapper& UrgWrapper, int LeftDegree, int RightDegree);
-
-	//test function
-	UFUNCTION(BlueprintPure, meta = (DevelopmentOnly = false, KeyWords = "Swampy", DisplayName = "Test Name", CompactNodeTitle = "Test", ToolTip = "Pew Pew Pew @param value float pew @param ReturnValue2 Hello pew @return return pew"), Category = "HokuyoRead | Test")
-	static bool testFunction(float value, int value2, FString& ReturnValue2);
-
-	//test function
-	UFUNCTION(BlueprintCallable, Category = "HokuyoRead | Test")
-	static bool hokuyoTest(int value, int& ReturnPew);
-
-	/*UFUNCTION(BlueprintPure)
-	static void PointsToString(const TArray<FVector2D>& Points, FString& StringPoints);*/
 };
 
 

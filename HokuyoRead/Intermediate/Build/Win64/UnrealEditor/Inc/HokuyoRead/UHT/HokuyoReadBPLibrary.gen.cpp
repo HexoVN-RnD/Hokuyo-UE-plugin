@@ -70,25 +70,6 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		}
 		return Z_Registration_Info_UScriptStruct_UrgWrapper.InnerSingleton;
 	}
-	DEFINE_FUNCTION(UHokuyoReadBPLibrary::exechokuyoTest)
-	{
-		P_GET_PROPERTY(FIntProperty,Z_Param_value);
-		P_GET_PROPERTY_REF(FIntProperty,Z_Param_Out_ReturnPew);
-		P_FINISH;
-		P_NATIVE_BEGIN;
-		*(bool*)Z_Param__Result=UHokuyoReadBPLibrary::hokuyoTest(Z_Param_value,Z_Param_Out_ReturnPew);
-		P_NATIVE_END;
-	}
-	DEFINE_FUNCTION(UHokuyoReadBPLibrary::exectestFunction)
-	{
-		P_GET_PROPERTY(FFloatProperty,Z_Param_value);
-		P_GET_PROPERTY(FIntProperty,Z_Param_value2);
-		P_GET_PROPERTY_REF(FStrProperty,Z_Param_Out_ReturnValue2);
-		P_FINISH;
-		P_NATIVE_BEGIN;
-		*(bool*)Z_Param__Result=UHokuyoReadBPLibrary::testFunction(Z_Param_value,Z_Param_value2,Z_Param_Out_ReturnValue2);
-		P_NATIVE_END;
-	}
 	DEFINE_FUNCTION(UHokuyoReadBPLibrary::execsetScanningDegree)
 	{
 		P_GET_STRUCT_REF(FUrgWrapper,Z_Param_Out_UrgWrapper);
@@ -131,18 +112,28 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 	{
 		P_GET_STRUCT_REF(FUrgWrapper,Z_Param_Out_UrgWrapper);
 		P_GET_PROPERTY(FIntProperty,Z_Param_CaptureTimes);
+		P_GET_UBOOL(Z_Param_enableKMeans);
+		P_GET_PROPERTY(FIntProperty,Z_Param_k);
+		P_GET_UBOOL(Z_Param_enableDBSCAN);
+		P_GET_PROPERTY(FFloatProperty,Z_Param_eps);
+		P_GET_PROPERTY(FIntProperty,Z_Param_min_pts);
 		P_FINISH;
 		P_NATIVE_BEGIN;
-		UHokuyoReadBPLibrary::getDistanceNonBlocking(Z_Param_Out_UrgWrapper,Z_Param_CaptureTimes);
+		UHokuyoReadBPLibrary::getDistanceNonBlocking(Z_Param_Out_UrgWrapper,Z_Param_CaptureTimes,Z_Param_enableKMeans,Z_Param_k,Z_Param_enableDBSCAN,Z_Param_eps,Z_Param_min_pts);
 		P_NATIVE_END;
 	}
 	DEFINE_FUNCTION(UHokuyoReadBPLibrary::execgetDistance)
 	{
 		P_GET_STRUCT_REF(FUrgWrapper,Z_Param_Out_UrgWrapper);
 		P_GET_PROPERTY(FIntProperty,Z_Param_CaptureTimes);
+		P_GET_UBOOL(Z_Param_enableKMeans);
+		P_GET_PROPERTY(FIntProperty,Z_Param_k);
+		P_GET_UBOOL(Z_Param_enableDBSCAN);
+		P_GET_PROPERTY(FFloatProperty,Z_Param_eps);
+		P_GET_PROPERTY(FIntProperty,Z_Param_min_pts);
 		P_FINISH;
 		P_NATIVE_BEGIN;
-		*(bool*)Z_Param__Result=UHokuyoReadBPLibrary::getDistance(Z_Param_Out_UrgWrapper,Z_Param_CaptureTimes);
+		*(bool*)Z_Param__Result=UHokuyoReadBPLibrary::getDistance(Z_Param_Out_UrgWrapper,Z_Param_CaptureTimes,Z_Param_enableKMeans,Z_Param_k,Z_Param_enableDBSCAN,Z_Param_eps,Z_Param_min_pts);
 		P_NATIVE_END;
 	}
 	DEFINE_FUNCTION(UHokuyoReadBPLibrary::execClearDBSCANCentroids)
@@ -198,10 +189,8 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 			{ "getDistance", &UHokuyoReadBPLibrary::execgetDistance },
 			{ "getDistanceNonBlocking", &UHokuyoReadBPLibrary::execgetDistanceNonBlocking },
 			{ "GetKMeansCentroids", &UHokuyoReadBPLibrary::execGetKMeansCentroids },
-			{ "hokuyoTest", &UHokuyoReadBPLibrary::exechokuyoTest },
 			{ "openConnection", &UHokuyoReadBPLibrary::execopenConnection },
 			{ "setScanningDegree", &UHokuyoReadBPLibrary::execsetScanningDegree },
-			{ "testFunction", &UHokuyoReadBPLibrary::exectestFunction },
 		};
 		FNativeFunctionRegistrar::RegisterFunctions(Class, Funcs, UE_ARRAY_COUNT(Funcs));
 	}
@@ -458,10 +447,22 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		{
 			FUrgWrapper UrgWrapper;
 			int32 CaptureTimes;
+			bool enableKMeans;
+			int32 k;
+			bool enableDBSCAN;
+			float eps;
+			int32 min_pts;
 			bool ReturnValue;
 		};
 		static const UECodeGen_Private::FStructPropertyParams NewProp_UrgWrapper;
 		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_CaptureTimes;
+		static void NewProp_enableKMeans_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_enableKMeans;
+		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_k;
+		static void NewProp_enableDBSCAN_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_enableDBSCAN;
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_eps;
+		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_min_pts;
 		static void NewProp_ReturnValue_SetBit(void* Obj);
 		static const UECodeGen_Private::FBoolPropertyParams NewProp_ReturnValue;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
@@ -472,6 +473,19 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 	};
 	const UECodeGen_Private::FStructPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_UrgWrapper = { "UrgWrapper", nullptr, (EPropertyFlags)0x0010000008000180, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistance_Parms, UrgWrapper), Z_Construct_UScriptStruct_FUrgWrapper, METADATA_PARAMS(nullptr, 0) }; // 3668095923
 	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_CaptureTimes = { "CaptureTimes", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistance_Parms, CaptureTimes), METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableKMeans_SetBit(void* Obj)
+	{
+		((HokuyoReadBPLibrary_eventgetDistance_Parms*)Obj)->enableKMeans = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableKMeans = { "enableKMeans", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventgetDistance_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableKMeans_SetBit, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_k = { "k", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistance_Parms, k), METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableDBSCAN_SetBit(void* Obj)
+	{
+		((HokuyoReadBPLibrary_eventgetDistance_Parms*)Obj)->enableDBSCAN = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableDBSCAN = { "enableDBSCAN", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventgetDistance_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableDBSCAN_SetBit, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_eps = { "eps", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistance_Parms, eps), METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_min_pts = { "min_pts", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistance_Parms, min_pts), METADATA_PARAMS(nullptr, 0) };
 	void Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_ReturnValue_SetBit(void* Obj)
 	{
 		((HokuyoReadBPLibrary_eventgetDistance_Parms*)Obj)->ReturnValue = 1;
@@ -480,15 +494,25 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_UrgWrapper,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_CaptureTimes,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableKMeans,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_k,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_enableDBSCAN,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_eps,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_min_pts,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::NewProp_ReturnValue,
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::Function_MetaDataParams[] = {
 		{ "Category", "Hokuyo | Scanning" },
+		{ "CPP_Default_enableDBSCAN", "true" },
+		{ "CPP_Default_enableKMeans", "false" },
+		{ "CPP_Default_eps", "30.000000" },
+		{ "CPP_Default_k", "1" },
+		{ "CPP_Default_min_pts", "3" },
 		{ "DisplayName", "Get Distance Result (Blocking)" },
 		{ "KeyWords", "Hokuyo" },
 		{ "ModuleRelativePath", "Public/HokuyoReadBPLibrary.h" },
-		{ "ToolTip", "This will execute on the main thread and freeze your program @param CaptureTimes Number of time it will run. 0 means it will run indefinitely" },
+		{ "ToolTip", "This will execute on the main thread and freeze your program\n @param CaptureTimes Number of time it will run. 0 means it will run indefinitely" },
 	};
 #endif
 	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UHokuyoReadBPLibrary, nullptr, "getDistance", nullptr, nullptr, sizeof(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::HokuyoReadBPLibrary_eventgetDistance_Parms), Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04422401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance_Statics::Function_MetaDataParams)) };
@@ -507,9 +531,21 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		{
 			FUrgWrapper UrgWrapper;
 			int32 CaptureTimes;
+			bool enableKMeans;
+			int32 k;
+			bool enableDBSCAN;
+			float eps;
+			int32 min_pts;
 		};
 		static const UECodeGen_Private::FStructPropertyParams NewProp_UrgWrapper;
 		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_CaptureTimes;
+		static void NewProp_enableKMeans_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_enableKMeans;
+		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_k;
+		static void NewProp_enableDBSCAN_SetBit(void* Obj);
+		static const UECodeGen_Private::FBoolPropertyParams NewProp_enableDBSCAN;
+		static const UECodeGen_Private::FFloatPropertyParams NewProp_eps;
+		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_min_pts;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 #if WITH_METADATA
 		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
@@ -518,17 +554,40 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 	};
 	const UECodeGen_Private::FStructPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_UrgWrapper = { "UrgWrapper", nullptr, (EPropertyFlags)0x0010000008000180, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms, UrgWrapper), Z_Construct_UScriptStruct_FUrgWrapper, METADATA_PARAMS(nullptr, 0) }; // 3668095923
 	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_CaptureTimes = { "CaptureTimes", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms, CaptureTimes), METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableKMeans_SetBit(void* Obj)
+	{
+		((HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms*)Obj)->enableKMeans = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableKMeans = { "enableKMeans", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableKMeans_SetBit, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_k = { "k", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms, k), METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableDBSCAN_SetBit(void* Obj)
+	{
+		((HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms*)Obj)->enableDBSCAN = 1;
+	}
+	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableDBSCAN = { "enableDBSCAN", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableDBSCAN_SetBit, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_eps = { "eps", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms, eps), METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_min_pts = { "min_pts", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms, min_pts), METADATA_PARAMS(nullptr, 0) };
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_UrgWrapper,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_CaptureTimes,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableKMeans,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_k,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_enableDBSCAN,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_eps,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::NewProp_min_pts,
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::Function_MetaDataParams[] = {
 		{ "Category", "Hokuyo | Scanning" },
+		{ "CPP_Default_enableDBSCAN", "true" },
+		{ "CPP_Default_enableKMeans", "false" },
+		{ "CPP_Default_eps", "30.000000" },
+		{ "CPP_Default_k", "1" },
+		{ "CPP_Default_min_pts", "3" },
 		{ "DisplayName", "Get Distance Result" },
 		{ "KeyWords", "Hokuyo" },
 		{ "ModuleRelativePath", "Public/HokuyoReadBPLibrary.h" },
-		{ "ToolTip", "Get the Sensor Distance Measurement Result @param CaptureTimes Number of time it will run. 0 means it will run indefinitely" },
+		{ "ToolTip", "Get the Sensor Distance Measurement Result using KMeans or DBSCAN\n@param CaptureTimes Number of time it will run. 0 means it will run indefinitely\n@param k For KMeans: Number of clusters\n@param eps For DBSCAN: Epsilon, the maximum distance two points can be from one another while still belonging to the same cluster\n@param min_pts For DBSCAN: the fewest number of points required to form a cluster" },
 	};
 #endif
 	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UHokuyoReadBPLibrary, nullptr, "getDistanceNonBlocking", nullptr, nullptr, sizeof(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::HokuyoReadBPLibrary_eventgetDistanceNonBlocking_Parms), Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04422401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking_Statics::Function_MetaDataParams)) };
@@ -577,54 +636,6 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		if (!ReturnFunction)
 		{
 			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_UHokuyoReadBPLibrary_GetKMeansCentroids_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics
-	{
-		struct HokuyoReadBPLibrary_eventhokuyoTest_Parms
-		{
-			int32 value;
-			int32 ReturnPew;
-			bool ReturnValue;
-		};
-		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_value;
-		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_ReturnPew;
-		static void NewProp_ReturnValue_SetBit(void* Obj);
-		static const UECodeGen_Private::FBoolPropertyParams NewProp_ReturnValue;
-		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_value = { "value", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventhokuyoTest_Parms, value), METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnPew = { "ReturnPew", nullptr, (EPropertyFlags)0x0010000000000180, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventhokuyoTest_Parms, ReturnPew), METADATA_PARAMS(nullptr, 0) };
-	void Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnValue_SetBit(void* Obj)
-	{
-		((HokuyoReadBPLibrary_eventhokuyoTest_Parms*)Obj)->ReturnValue = 1;
-	}
-	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnValue = { "ReturnValue", nullptr, (EPropertyFlags)0x0010000000000580, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventhokuyoTest_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnValue_SetBit, METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::PropPointers[] = {
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_value,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnPew,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::NewProp_ReturnValue,
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::Function_MetaDataParams[] = {
-		{ "Category", "HokuyoRead | Test" },
-		{ "Comment", "//test function\n" },
-		{ "ModuleRelativePath", "Public/HokuyoReadBPLibrary.h" },
-		{ "ToolTip", "test function" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UHokuyoReadBPLibrary, nullptr, "hokuyoTest", nullptr, nullptr, sizeof(Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::HokuyoReadBPLibrary_eventhokuyoTest_Parms), Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04422401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest_Statics::FuncParams);
 		}
 		return ReturnFunction;
 	}
@@ -739,61 +750,6 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		}
 		return ReturnFunction;
 	}
-	struct Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics
-	{
-		struct HokuyoReadBPLibrary_eventtestFunction_Parms
-		{
-			float value;
-			int32 value2;
-			FString ReturnValue2;
-			bool ReturnValue;
-		};
-		static const UECodeGen_Private::FFloatPropertyParams NewProp_value;
-		static const UECodeGen_Private::FUnsizedIntPropertyParams NewProp_value2;
-		static const UECodeGen_Private::FStrPropertyParams NewProp_ReturnValue2;
-		static void NewProp_ReturnValue_SetBit(void* Obj);
-		static const UECodeGen_Private::FBoolPropertyParams NewProp_ReturnValue;
-		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-	const UECodeGen_Private::FFloatPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_value = { "value", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventtestFunction_Parms, value), METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_value2 = { "value2", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventtestFunction_Parms, value2), METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FStrPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue2 = { "ReturnValue2", nullptr, (EPropertyFlags)0x0010000000000180, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(HokuyoReadBPLibrary_eventtestFunction_Parms, ReturnValue2), METADATA_PARAMS(nullptr, 0) };
-	void Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue_SetBit(void* Obj)
-	{
-		((HokuyoReadBPLibrary_eventtestFunction_Parms*)Obj)->ReturnValue = 1;
-	}
-	const UECodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue = { "ReturnValue", nullptr, (EPropertyFlags)0x0010000000000580, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, sizeof(bool), sizeof(HokuyoReadBPLibrary_eventtestFunction_Parms), &Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue_SetBit, METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::PropPointers[] = {
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_value,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_value2,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue2,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::NewProp_ReturnValue,
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::Function_MetaDataParams[] = {
-		{ "Category", "HokuyoRead | Test" },
-		{ "CompactNodeTitle", "Test" },
-		{ "DevelopmentOnly", "FALSE" },
-		{ "DisplayName", "Test Name" },
-		{ "KeyWords", "Swampy" },
-		{ "ModuleRelativePath", "Public/HokuyoReadBPLibrary.h" },
-		{ "ToolTip", "Pew Pew Pew @param value float pew @param ReturnValue2 Hello pew @return return pew" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UHokuyoReadBPLibrary, nullptr, "testFunction", nullptr, nullptr, sizeof(Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::HokuyoReadBPLibrary_eventtestFunction_Parms), Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x14422401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
 	IMPLEMENT_CLASS_NO_AUTO_REGISTRATION(UHokuyoReadBPLibrary);
 	UClass* Z_Construct_UClass_UHokuyoReadBPLibrary_NoRegister()
 	{
@@ -820,13 +776,11 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_closeConnection, "closeConnection" }, // 2938648371
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_closeConnectionifFalse, "closeConnectionifFalse" }, // 735012480
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_GetDBSCANCentroids, "GetDBSCANCentroids" }, // 2469542561
-		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance, "getDistance" }, // 559821614
-		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking, "getDistanceNonBlocking" }, // 1174237233
+		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistance, "getDistance" }, // 871696623
+		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_getDistanceNonBlocking, "getDistanceNonBlocking" }, // 3210822216
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_GetKMeansCentroids, "GetKMeansCentroids" }, // 2226067403
-		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_hokuyoTest, "hokuyoTest" }, // 3641435949
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_openConnection, "openConnection" }, // 962609297
 		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_setScanningDegree, "setScanningDegree" }, // 1014760031
-		{ &Z_Construct_UFunction_UHokuyoReadBPLibrary_testFunction, "testFunction" }, // 2682090519
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UHokuyoReadBPLibrary_Statics::Class_MetaDataParams[] = {
@@ -877,9 +831,9 @@ template<> HOKUYOREAD_API UScriptStruct* StaticStruct<FUrgWrapper>()
 		{ FUrgWrapper::StaticStruct, Z_Construct_UScriptStruct_FUrgWrapper_Statics::NewStructOps, TEXT("UrgWrapper"), &Z_Registration_Info_UScriptStruct_UrgWrapper, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FUrgWrapper), 3668095923U) },
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_UHokuyoReadBPLibrary, UHokuyoReadBPLibrary::StaticClass, TEXT("UHokuyoReadBPLibrary"), &Z_Registration_Info_UClass_UHokuyoReadBPLibrary, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UHokuyoReadBPLibrary), 3692523353U) },
+		{ Z_Construct_UClass_UHokuyoReadBPLibrary, UHokuyoReadBPLibrary::StaticClass, TEXT("UHokuyoReadBPLibrary"), &Z_Registration_Info_UClass_UHokuyoReadBPLibrary, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UHokuyoReadBPLibrary), 3837717703U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_3090292254(TEXT("/Script/HokuyoRead"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_1929878311(TEXT("/Script/HokuyoRead"),
 		Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_Statics::ClassInfo),
 		Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_Statics::ScriptStructInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_HostProject_Plugins_HokuyoRead_Source_HokuyoRead_Public_HokuyoReadBPLibrary_h_Statics::ScriptStructInfo),
 		nullptr, 0);
